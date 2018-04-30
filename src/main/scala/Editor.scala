@@ -95,6 +95,26 @@ class Editor {
         }
         return true
      }
+
+    /** exercise 3.1.2, command to transpose the characters to the left and right of the point **/
+    def transposeCommand(): Boolean = {
+      val lineLength = ed.getLineLength(ed.getRow(ed.point))
+      if(lineLength <= 2) {
+        beep()
+        return false
+      }
+      var position = ed.point
+
+      // shift the position to the left if the cursor
+      val col = ed.getColumn(position)
+      if(col > lineLength - 3)
+      {
+        position -= col - lineLength + 3
+      }
+
+      ed.transposeChars(position)
+      true
+    }
     
     /** Command: Save the file */
     def saveFileCommand() {
@@ -228,7 +248,8 @@ object Editor {
         Display.ctrl('P') -> (_.moveCommand(UP)),
         Display.ctrl('Q') -> (_.quit),
         Display.ctrl('R') -> (_.replaceFileCommand),
-        Display.ctrl('W') -> (_.saveFileCommand)
+        Display.ctrl('W') -> (_.saveFileCommand),
+        Display.ctrl('T') -> (_.transposeCommand)
         )
 
     for (ch <- Display.printable)

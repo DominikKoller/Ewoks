@@ -141,6 +141,14 @@ class EdBuffer {
         text.insert(pos, ch)
         setModified()
     }
+
+    def transposeChars(pos: Int): Unit = {
+        // pre: pos < text.length - 2
+        noteDamage(true) // TODO think about this
+        text.insert(pos+2, text.charAt(pos))
+        text.deleteChar(pos)
+        setModified()
+    }
     
     /** Insert a string */
     def insert(pos: Int, s: String) {
