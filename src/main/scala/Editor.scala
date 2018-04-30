@@ -52,8 +52,12 @@ class Editor {
                 p = ed.getPos(row+1, goalColumn())
             case Editor.HOME =>
                 p = ed.getPos(row, 0)
+            case Editor.CTRLHOME =>
+              p = ed.getPos(0, 0)
             case Editor.END =>
                 p = ed.getPos(row, ed.getLineLength(row)-1)
+            case Editor.CTRLEND =>
+                p = ed.getPos(ed.numLines-1, ed.getLineLength(ed.numLines-1)-1)
             case Editor.PAGEDOWN =>
                 p = ed.getPos(row + Editor.SCROLL, 0)
                 display.scroll(+Editor.SCROLL)
@@ -176,9 +180,11 @@ object Editor {
     val UP = 3
     val DOWN = 4
     val HOME = 5
-    val END = 6
-    val PAGEUP = 7
-    val PAGEDOWN = 8
+    val CTRLHOME = 6
+    val END = 7
+    val CTRLEND = 8
+    val PAGEUP = 9
+    val PAGEDOWN = 10
     
     /** Amount to scroll the screen for PAGEUP and PAGEDOWN */
     val SCROLL = Display.HEIGHT - 3
@@ -204,7 +210,9 @@ object Editor {
         Display.UP -> (_.moveCommand(UP)),
         Display.DOWN -> (_.moveCommand(DOWN)),
         Display.HOME -> (_.moveCommand(HOME)),
+        Display.CTRLHOME -> (_.moveCommand(CTRLHOME)),
         Display.END -> (_.moveCommand(END)),
+        Display.CTRLEND -> (_.moveCommand(CTRLEND)),
         Display.PAGEUP -> (_.moveCommand(PAGEUP)),
         Display.PAGEDOWN -> (_.moveCommand(PAGEDOWN)),
         Display.ctrl('?') -> (_.deleteCommand(LEFT)),
