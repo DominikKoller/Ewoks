@@ -74,7 +74,7 @@ class Editor {
     /** Command: Insert a character */
     def insertCommand(ch: Char) {
         ed.insert(ch)
-        ed.point += 1
+        ed.point += 1 // TODO discuss, why is this here while the mark is adjusted in EdBuffer?
     }
 
     /** Command: Delete in a specified direction */
@@ -105,6 +105,16 @@ class Editor {
       }
       ed.transposeChars(ed.point)
       true
+    }
+
+    def setMarkCommand(): Unit = {
+        ed.mark = ed.point
+    }
+
+    def swapMarkCommand(): Unit = {
+        val point = ed.point
+        ed.point = ed.mark
+        ed.mark = point
     }
     
     /** Command: Save the file */
@@ -240,7 +250,9 @@ object Editor {
         Display.ctrl('Q') -> (_.quit),
         Display.ctrl('R') -> (_.replaceFileCommand),
         Display.ctrl('W') -> (_.saveFileCommand),
-        Display.ctrl('T') -> (_.transposeCommand)
+        Display.ctrl('T') -> (_.transposeCommand),
+        Display.ctrl('M') -> (_.setMarkCommand),
+        Display.ctrl('O') -> (_.swapMarkCommand)
         )
 
     for (ch <- Display.printable)

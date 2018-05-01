@@ -22,6 +22,7 @@ class EdBuffer {
 
     /** Current editing position. */
     private var _point = 0
+    private var _mark = 0
 
     // State components that are not restored on undo
 
@@ -71,16 +72,21 @@ class EdBuffer {
         noteDamage(true)
         update()
     }
-
-
+    
     // Accessors
 
     def point = _point
+    def mark = _mark
 
     def point_=(point: Int) {
         if (damage == EdBuffer.REWRITE_LINE && getRow(point) != damage_line)
             damage = EdBuffer.REWRITE
         _point = point
+    }
+
+    // TODO check if there is more to do here (like in the case of point)
+    def mark_=(mark: Int): Unit = {
+        _mark = mark
     }
 
     def filename = _filename
@@ -118,6 +124,8 @@ class EdBuffer {
         val ch = text.charAt(pos)
         noteDamage(ch == '\n' || getRow(pos) != getRow(point))
         text.deleteChar(pos)
+        if(pos <= _mark)
+            _mark -= 1
         setModified()
     }
 
@@ -125,6 +133,8 @@ class EdBuffer {
     def deleteRange(pos: Int, len: Int) {
         noteDamage(true)
         text.deleteRange(pos, len)
+        if(pos <= _mark)
+            _mark -= len
         setModified()
     }
     
@@ -139,6 +149,8 @@ class EdBuffer {
     def insert(pos: Int, ch: Char) {
         noteDamage(ch == '\n' || getRow(pos) != getRow(point))
         text.insert(pos, ch)
+        if (pos <= _mark)
+            _mark += 1
         setModified()
     }
 
@@ -163,6 +175,8 @@ class EdBuffer {
     def insert(pos: Int, s: String) {
         noteDamage(true)
         text.insert(pos, s)
+        if(pos <= _mark)
+            _mark += s.length
         setModified()
     }
     
@@ -170,6 +184,8 @@ class EdBuffer {
     def insert(pos: Int, s: Text.Immutable) {
         noteDamage(true)
         text.insert(pos, s)
+        if(pos <= _mark)
+            _mark += s.length
         setModified()
     }
     
@@ -177,6 +193,8 @@ class EdBuffer {
     def insert(pos: Int, t: Text) {
         noteDamage(true)
         text.insert(pos, t)
+        if(pos <= _mark)
+            _mark += t.length
         setModified()
     }
     
@@ -223,9 +241,13 @@ class EdBuffer {
      * is recorded consists of just the current point. */
     class Memento {
         private val pt = point
+        private val mk = mark
         
         /** Restore the state when the memento was created */
-        def restore() { point = pt }
+        def restore() {
+            point = pt
+            mark = mk
+        }
     }
     
     
