@@ -103,16 +103,7 @@ class Editor {
         beep()
         return false
       }
-      var position = ed.point
-
-      // shift the position to the left if the cursor
-      val col = ed.getColumn(position)
-      if(col > lineLength - 3)
-      {
-        position -= col - lineLength + 3
-      }
-
-      ed.transposeChars(position)
+      ed.transposeChars(ed.point)
       true
     }
     

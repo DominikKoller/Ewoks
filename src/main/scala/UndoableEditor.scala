@@ -39,6 +39,25 @@ class UndoableEditor extends Editor with UndoHistory {
             }
         }
     }
+
+    /** exercise 3.1.2: undoable transpose operation **/
+    class Transpose(val position: Int) extends Change {
+        def undo(): Unit = {
+            ed.transposeChars(position)
+        }
+        def redo(): Unit = {
+            ed.transposeChars(position)
+        }
+    }
+
+    override def transposeCommand(): Boolean = {
+        if(super.transposeCommand()) {
+            lastChange = new Transpose(ed.point)
+            return true
+        }
+        false
+    }
+
       
    
     /** Command: Delete in a specified direction and record change */
@@ -62,7 +81,7 @@ class UndoableEditor extends Editor with UndoHistory {
     /** Prompt for a file to read into the buffer and reset history */
     override def replaceFileCommand(): Boolean = {
         if (super.replaceFileCommand()) {resetHistory(); return true}
-        return false
+        false
     }
  
 

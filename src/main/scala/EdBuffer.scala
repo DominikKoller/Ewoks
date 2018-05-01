@@ -145,8 +145,17 @@ class EdBuffer {
     def transposeChars(pos: Int): Unit = {
         // pre: pos < text.length - 2
         noteDamage(true) // TODO think about this
-        text.insert(pos+2, text.charAt(pos))
-        text.deleteChar(pos)
+
+        val lineLength = getLineLength(getRow(pos))
+        var actualPos = pos
+
+        // shift the position to the left if it is too far right
+        val col = getColumn(actualPos)
+        if(col > lineLength - 3)
+            actualPos -= col - lineLength + 3
+
+        text.insert(actualPos+2, text.charAt(actualPos))
+        text.deleteChar(actualPos)
         setModified()
     }
     
