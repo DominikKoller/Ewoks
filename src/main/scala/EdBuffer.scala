@@ -29,6 +29,10 @@ class EdBuffer {
     /** File name for saving the text. */
     private var _filename = ""
 
+    // Now in Editor:
+    // /** Text buffer for clipboard */
+    // private val _clipboard: Text = new Text()
+
     /** Dirty flag */
     private var modified = false
 
@@ -37,6 +41,7 @@ class EdBuffer {
 
     /** Test whether the text is modified */
     def isModified = modified
+
     
 
     // Display update
@@ -110,6 +115,8 @@ class EdBuffer {
 
     def getRange(pos: Int, len: Int) = text.getRange(pos, len)
 
+    def getRange(start: Int, nchars: Int, buf: Text) = text.getRange(start, nchars, buf)
+
     def numLines = text.numLines
 
     def fetchLine(n: Int, buf: Text) { text.fetchLine(n, buf) }
@@ -133,17 +140,22 @@ class EdBuffer {
     def deleteRange(pos: Int, len: Int) {
         noteDamage(true)
         text.deleteRange(pos, len)
-        if(pos <= _mark)
-            _mark -= len
+        if(pos < _mark) {
+            _mark -= Math.min(len, _mark - pos)
+        }
         setModified()
     }
-    
+
+    // TODO discuss why we don't use overloading here
+    // would be equivalent in functionality but safer, right?
     /** Insert at current value of point */
     def insert(a: Any) { 
-        a match {case ch: Char => insert(point, ch)
-                 case s : String => insert(point, s)
+        a match {
+            case ch: Char => insert(point, ch)
+            case s : String => insert(point, s)
+            case t : Text => insert(point, t)
         }
-    }    
+    }
   
     /** Insert a character at a specified position */
     def insert(pos: Int, ch: Char) {
@@ -170,6 +182,8 @@ class EdBuffer {
         text.deleteChar(actualPos)
         setModified()
     }
+
+
     
     /** Insert a string */
     def insert(pos: Int, s: String) {

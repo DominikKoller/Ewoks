@@ -8,8 +8,11 @@ class Editor {
     /** The buffer being edited. */
     protected val ed = new EdBuffer
 
+    /** Text buffer for clipboard */
+    protected val _clipboard: Text = new Text()
+
     /** The display. */
-    protected var display: Display = null
+    protected var display: Display = _
     
     /** Whether the command loop should continue */
     private var alive = true
@@ -105,6 +108,43 @@ class Editor {
       }
       ed.transposeChars(ed.point)
       true
+    }
+
+    /** Exercise 3.1.4, copy and paste **/
+    def copyCommand(): Unit = {
+        val start  = Math.min(ed.point, ed.mark)
+        val length = Math.abs(ed.point - ed.mark)
+
+        ed.getRange(start, length, _clipboard)
+    }
+
+    def cutCommand(): Boolean = {
+        val start  = Math.min(ed.point, ed.mark)
+        val length = Math.abs(ed.point - ed.mark)
+
+        if(length == 0)
+            return false
+
+        ed.getRange(start, length, _clipboard)
+        ed.deleteRange(start, length)
+        // TODO discuss: deleteRange should return the deleted text
+
+        // TODO discuss again: why is that here and not in EdBuffer.deleteRange?
+        if(start < ed.point)
+            ed.point -= Math.min(length, ed.point - start)
+
+        true
+    }
+
+    def pasteCommand(): Boolean = {
+        if(_clipboard.length == 0)
+            return false
+
+        ed.insert(_clipboard)
+        // TODO discuss: why is that not in insert
+        ed.point += _clipboard.length
+
+        true
     }
 
     def setMarkCommand(): Unit = {
@@ -252,7 +292,10 @@ object Editor {
         Display.ctrl('W') -> (_.saveFileCommand),
         Display.ctrl('T') -> (_.transposeCommand),
         Display.ctrl('M') -> (_.setMarkCommand),
-        Display.ctrl('O') -> (_.swapMarkCommand)
+        Display.ctrl('O') -> (_.swapMarkCommand),
+        Display.ctrl('C') -> (_.copyCommand),
+        Display.ctrl('X') -> (_.cutCommand),
+        Display.ctrl('V') -> (_.pasteCommand)
         )
 
     for (ch <- Display.printable)

@@ -64,6 +64,10 @@ class PlaneText(init: Int) extends Text() {
         super.insert(pos, s)
         mapLines()
     }
+
+    // insert(pos: Int, t: Text) uses insertRange, hence no need to override
+    // this breaks encapsulation though! Should we really rely on this?
+    // TODO discuss
     
     override def insertRange(pos: Int, t: Text, start: Int, nchars: Int) {
         super.insertRange(pos, t, start, nchars)
