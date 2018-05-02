@@ -144,6 +144,10 @@ class Text(init: Int) extends CharSequence {
     /** Fetch the range [start..start+nchars) as an immutable text */
     def getRange(start: Int, nchars: Int) =
         new Text.Immutable(getString(start, nchars))
+
+    /** Get a immutable copy */
+    def getImmutable() =
+        new Text.Immutable(getString(0, length))
     
     /** Fetch a range into another text */
     def getRange(start: Int, nchars: Int, buf: Text) {

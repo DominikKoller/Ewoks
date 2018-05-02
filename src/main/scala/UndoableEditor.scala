@@ -50,6 +50,24 @@ class UndoableEditor extends Editor with UndoHistory {
         }
     }
 
+    class Paste(val position: Int, val text: Text.Immutable) extends Change {
+        def undo(): Unit = {
+            ed.deleteRange(position, text.length)
+        }
+        def redo(): Unit = {
+            ed.insert(position, text)
+        }
+    }
+
+    class Cut(val position: Int, val text: Text.Immutable) extends Change {
+        def undo(): Unit = {
+            ed.insert(position, text)
+        }
+        def redo(): Unit = {
+            ed.deleteRange(position, text.length)
+        }
+    }
+
     override def transposeCommand(): Boolean = {
         if(super.transposeCommand()) {
             lastChange = new Transpose(ed.point)
@@ -58,14 +76,30 @@ class UndoableEditor extends Editor with UndoHistory {
         false
     }
 
-      
+    override def pasteCommand(): Boolean = {
+        val start = ed.point
+        if(super.pasteCommand()) {
+            lastChange = new Paste(start, _clipboard.getImmutable())
+            return true
+        }
+        false
+    }
+
+    override def cutCommand(): Boolean = {
+        val start = ed.point
+        if(super.cutCommand()) {
+            lastChange = new Cut(start, _clipboard.getImmutable())
+            return true
+        }
+        false
+    }
    
     /** Command: Delete in a specified direction and record change */
     override def deleteCommand(dir: Int): Boolean = {
         var p = ed.point
         var ch = ' '
         
-        if (dir == Editor.LEFT) p -= 1; 
+        if (dir == Editor.LEFT) p -= 1
         if (p>=0 && p<ed.length) ch = ed.charAt(p)
         
         if (super.deleteCommand(dir)) {
@@ -75,7 +109,7 @@ class UndoableEditor extends Editor with UndoHistory {
             }
             return true
         }
-        return false
+        false
     }
     
     /** Prompt for a file to read into the buffer and reset history */
